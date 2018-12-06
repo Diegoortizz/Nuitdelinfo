@@ -8,7 +8,9 @@ function preload() {
     game.load.image('gauche', 'Graphics/gauche.png');
     game.load.image('droite', 'Graphics/droite.png');
 
-    game.load.spritesheet('veggies', 'Graphics/arbre.png', 48,32);
+    game.load.image('baie', 'Graphics/baie.png');
+    game.load.image('batterie', 'Graphics/batterie.png');
+    game.load.image('arbre', 'Graphics/arbre.png');
 
 }
 
@@ -28,16 +30,24 @@ function create() {
     
     group = game.add.physicsGroup();
 
-    for (var i = 0; i < 50; i++)
+    for (var i = 0; i < 30; i++)
     {
-        var c = group.create(game.rnd.between(100, 770), game.rnd.between(0, 570), 'veggies', 0);
-        c.name = "test";
-        console.log(c.name);
+        var c = group.create(game.rnd.between(100, 770), game.rnd.between(0, 570), 'baie');
+        c.id = "baie";
+        c.body.immovable = true;
+    }
+    
+    for (var i = 0; i < 30; i++)
+    {
+        var c = group.create(game.rnd.between(100, 770), game.rnd.between(0, 570), 'batterie');
+        c.id = "batterie";
+        c.body.immovable = true;
     }
 
     for (var i = 0; i < 20; i++)
     {
-        var c = group.create(game.rnd.between(100, 770), game.rnd.between(0, 570), 'veggies', 1);
+        var c = group.create(game.rnd.between(100, 770), game.rnd.between(0, 570), 'arbre');
+        c.id = "arbre";
         c.body.immovable = true;
     }
 
@@ -92,10 +102,7 @@ function processHandler (player, veg) {
 }
 
 function collisionHandler (player, veg) {
-    veg.truc = 5;
-    console.log(veg.animations.currentFrame.index);
-    console.log(veg);
+   if(veg.id == "baie"){
     veg.kill();
-
-
+    }
 }
