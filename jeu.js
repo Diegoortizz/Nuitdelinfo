@@ -3,7 +3,11 @@ var game = new Phaser.Game(800, 600, Phaser.Canvas, 'phaser-example', { preload:
 
 function preload() {
 
-    game.load.image('phaser', 'Graphics/bas.png');
+    game.load.image('bas', 'Graphics/bas.png');
+    game.load.image('face', 'Graphics/haut.png');
+    game.load.image('gauche', 'Graphics/gauche.png');
+    game.load.image('droite', 'Graphics/droite.png');
+
     game.load.spritesheet('veggies', 'Graphics/arbre.png', 48,32);
 
 }
@@ -18,7 +22,7 @@ function create() {
 
     game.stage.backgroundColor = '#2d2d2d';
 
-    sprite = game.add.sprite(32, 200, 'phaser');
+    sprite = game.add.sprite(32, 200, 'bas');
 
     game.physics.arcade.enable(sprite);
     
@@ -61,19 +65,23 @@ function update() {
     if (cursors.left.isDown)
     {
         sprite.body.velocity.x = -200;
+        sprite.loadTexture("gauche",0, false)
     }
     else if (cursors.right.isDown)
     {
         sprite.body.velocity.x = 200;
+        sprite.loadTexture("droite",0, false)
     }
 
     if (cursors.up.isDown)
     {
         sprite.body.velocity.y = -200;
+        sprite.loadTexture("face",0, false)
     }
     else if (cursors.down.isDown)
     {
         sprite.body.velocity.y = 200;
+        sprite.loadTexture("bas",0, false)
     }
 }
 
