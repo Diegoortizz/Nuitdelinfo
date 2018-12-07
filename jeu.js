@@ -1,4 +1,4 @@
-var game2 = new Phaser.Game(800, 95, Phaser.Canvas, 'phaser-example-2', { preload: preload2, create: create2 });
+var game2 = new Phaser.Game(1356, 95, Phaser.Canvas, 'phaser-example-2', { preload: preload2, create: create2 });
 var game = new Phaser.Game(1356, 900, Phaser.Canvas, 'phaser-example', { preload: preload, create: create, update: update });
 
 
@@ -13,10 +13,14 @@ function preload() {
     game.load.image('batterie', 'Graphics/batterie.png');
     game.load.image('cactus', 'Graphics/cactus.png');
     game.load.image('eau', 'Graphics/eau.png');
+    game.load.image('rocher', 'Graphics/rocher.png');
+    game.load.image('panneau', 'Graphics/panneau.png');
 
     game.load.image('carte', 'Graphics/map.png');
 
     game.load.image('base', 'Graphics/base.png');
+
+    game.load.image('rejouer', 'Graphics/rejouer.png');
 
 }
 
@@ -25,15 +29,19 @@ function preload2() {
     game2.load.image('drink_bar', 'Graphics/drink_bar.png');
     game2.load.image('eat_bar', 'Graphics/eat_bar.png');
     game2.load.image('energy_bar', 'Graphics/energy_bar.png');
+    game2.load.image('batterie', 'Graphics/batterie.png');
+    game2.load.image('panneau', 'Graphics/panneau.png');
+
 
 }
-var cst_down = 0.15;
+
 var sprite;
 var group;
 var cursors;
 
 var timer;
 
+var playerSpeed = 250;
 
 var eatbar;
 var drinkbar;
@@ -43,18 +51,26 @@ var maxLenBar = 500;
 
 var day;
 var timer2;
-var timer3;
 var generatedItem;
 
 var bmpText;
-var items = ["baie","batterie","eau"];
+var items = ["baie","batterie","eau","panneau"];
+
+var restartButton;
+var flag = false;
+
+var totalEnergy = 0;
+var food;
+var water;
+var energy;
+var nbBatteries = 0;
+var txtNbBatteries;
 
 function create2() {
-
-
-    timer2 = game2.time.events.loop(600, updateDay, this);
-
-    game2.stage.backgroundColor = "#ffffff";
+    game2.add.sprite(game2.width-75, game2.height/2,'batterie');
+    game2.add.sprite(game2.width-50, game2.height/2,'panneau');
+    
+    game2.stage.backgroundColor = "#eee";
 
     eatbar = game2.add.sprite(0, 0, 'eat_bar');
     eatbar.cropEnabled = true;
@@ -68,6 +84,7 @@ function create2() {
 
     timer = game2.time.create(false);
 
+    timer.loop(600, updateDay, this);
     timer.loop(1, update_eatbar, this);
     timer.loop(1, update_drinkbar, this);
     timer.loop(1, update_energybar, this);
@@ -77,13 +94,16 @@ function create2() {
 
     var style = { font: "16px Arial", fill: "BLACK" };
     day = 121;
-    bmpText = game2.add.text(550, 16, "JOURS RESTANTS : " + day, style);
+    bmpText = game2.add.text(game2.width/2, 16, "JOURS RESTANTS : " + day, style);
     food = game2.add.text(5, 4, "Nourriture", style);
     water = game2.add.text(5, 33, "Eau", style);
     energy = game2.add.text(5, 62, "Energie", style);
+    txtNbBatteries = game2.add.text(game2.width-30, game2.height/2, "x "+nbBatteries, style);
 
 }
-function create() {    
+
+function create() {   
+
     game.world.scale.setTo(1.5, 1.5);
 
     game.add.tileSprite(0, 0, game.width, game.height, "carte");
@@ -95,7 +115,7 @@ function create() {
 
     sprite = game.add.sprite(game.width/2, game.height/2+50, 'bas');
 
-    game.camera.follow(sprite, Phaser.Camera.FOLLOW_LOCKON);
+    game.camera.follow(sprite, Phaser.Camera.FOLLOW_LOCKON,0.1, 0.1);
 
     game.physics.enable(sprite);
 
@@ -103,36 +123,20 @@ function create() {
 
     generatedItem = generateObj(100);
 
-    for (var i = 0; i < 10; i++) {
-        var c = group.create(game.rnd.between(10, 1346), game.rnd.between(10, 700), 'batterie');
-        c.id = "batterie";
-        c.body.immovable = true;
-    }
+    generateSameItem('cactus',50);
+    generateSameItem('rocher', 30);
 
-    for (var i = 0; i < 40; i++) {
-        var c = group.create(game.rnd.between(10, 1346), game.rnd.between(10, 700), 'cactus');
-        c.id = "cactus";
-        c.body.immovable = true;
-    }
-    generateCactus(50);
+    timer2 = game.time.create(false);
 
-    timer3 = game.time.events.loop(game.rnd.between(500, 3000), showObjet, this);
+    timer2.loop(game.rnd.between(800, 2000), showObjet, this);
 
-
-    for (var i = 0; i < 30; i++) {
-        var c = group.create(game.rnd.between(100, 770), game.rnd.between(10, 570), 'eau');
-        c.id = "eau";
-        c.body.immovable = true;
-    }
-
+    timer2.start();
 
     var base = group.create(650,300,'base');
     base.id="base";
     base.body.immovable=true;
 
     cursors = game.input.keyboard.createCursorKeys();
-
-    game.time.events.add(Phaser.Timer.SECOND * 10, end, this);
 }
 
 function showObjet(){
@@ -140,10 +144,6 @@ function showObjet(){
     var c = group.create(obj[0], obj[1], obj.id);
     c.id = obj.id;
     c.body.immovable = true;
-}
-
-function end() {
-    console.log("stop");
 }
 
 function randomInRange(start, end) {
@@ -170,31 +170,34 @@ function generateObj(n) {
         if (x < 730 && x > 650 && y > 300 && y < 380) {
             unique.splice(i, 1);
         } else {
-            unique[i].id = items[randomInRange(0,2)];
+            unique[i].id = items[randomInRange(0,items.length)];
         }
     }
 
     return unique;
 }
 
-function generateCactus(n){
+function generateSameItem(itemID, n){
     for(var i=0; i<n; i++){
-        var c = group.create(randomInRange(0, game.width), randomInRange(0, game.height), 'cactus');
-        c.id = 'cactus';
+        var c = group.create(randomInRange(0, game.width), randomInRange(0, game.height), itemID);
+        c.id = itemID;
         c.body.immovable = true;
     }
 }
 
-function checkBounds(){
-    if(sprite.x < 0){sprite.x = game.width}
-    if(sprite.x > game.width){sprite.x = 0}
-    if(sprite.y < 0){sprite.y = game.height}
-    if(sprite.y > game.height){sprite.y = 0}
+
+
+function checkIfAlive(){
+    if(eatbar.width <= 0 || energybar.width <= 0 || drinkbar.width <= 0){
+        gameOver("LOSE");
+    }
 }
 
 function update() {
     //game.time.events.add(Phaser.Timer.SECOND * game.rnd.between(1,5), generateItem(items));
-    checkBounds();
+    game.world.wrap(sprite, 0, true);
+
+    checkIfAlive();
 
     game.physics.arcade.collide(sprite, group, collisionHandler, processHandler, this)
 
@@ -202,20 +205,20 @@ function update() {
     sprite.body.velocity.y = 0;
 
     if (cursors.left.isDown) {
-        sprite.body.velocity.x = -200;
+        sprite.body.velocity.x = -playerSpeed;
         sprite.loadTexture("gauche", 0, false)
     }
     else if (cursors.right.isDown) {
-        sprite.body.velocity.x = 200;
+        sprite.body.velocity.x = playerSpeed;
         sprite.loadTexture("droite", 0, false)
     }
 
     if (cursors.up.isDown) {
-        sprite.body.velocity.y = -200;
+        sprite.body.velocity.y = -playerSpeed;
         sprite.loadTexture("face", 0, false)
     }
     else if (cursors.down.isDown) {
-        sprite.body.velocity.y = 200;
+        sprite.body.velocity.y = playerSpeed;
         sprite.loadTexture("bas", 0, false)
     }
 }
@@ -231,8 +234,11 @@ function collisionHandler(player, veg) {
             veg.kill();
             break;
 
+        case "panneau":
         case "batterie":
-            energybar.width = (energybar.width + 50 > maxLenBar)? maxLenBar : energybar.width + 50;
+            totalEnergy += 50;
+            nbBatteries++;
+            txtNbBatteries.text = "x "+nbBatteries;
             veg.kill();
             break;
 
@@ -240,22 +246,28 @@ function collisionHandler(player, veg) {
             drinkbar.width = (drinkbar.width + 50 > maxLenBar)? maxLenBar : drinkbar.width + 50;
             veg.kill();
             break;
+
+        case "base":
+            energybar.width = (energybar.width + totalEnergy > maxLenBar)? maxLenBar : energybar.width + totalEnergy;
+            totalEnergy = 0;
+            nbBatteries = 0;
+            txtNbBatteries.text = "x "+nbBatteries;
     }
 }
 
 function update_drinkbar() { // 15
     // console.log("drink");
-    drinkbar.width -= 0.7;
+    drinkbar.width -= 0.35;
 }
 
 function update_eatbar() { // 10
     // console.log("eat");
-    eatbar.width -= 0.5;;
+    eatbar.width -= 0.25;;
 }
 
 function update_energybar() { // 5
     // console.log("energy");
-    energybar.width -= 0.3;;
+    energybar.width -= 0.15;;
 }
 
 function randomnbr(a, b, n) {
@@ -264,21 +276,63 @@ function randomnbr(a, b, n) {
 
 
 function updateDay() {
-    day--;
-    if (day <1){
-        console.log("test")
+    if(day !== 0){
+        day--;
+        bmpText.text = "JOURS RESTANTS : " + day;
+    }else{
+        gameOver("WIN");
     }
-    console.log("in update day")
-    bmpText.text = "JOURS RESTANTS : " + day;
-
+}
+   
+function restartGame(){
+        flag = false;
+        totalEnergy = 0;
+        restartButton.destroy();
+        game.state.restart();
+        game2.state.restart();
 }
 
-function render() {
+function gameOver(result){ 
+        var message;
+        var textX;
+        var textY;
 
-    game.debug.cameraInfo(game.camera, 32, 32);
-    game.debug.spriteCoords(player, 32, 500);
+        game.world.scale.setTo(1, 1);
 
-}
+        if(result === "WIN"){
+            message = "FELICITATIONS !";
+            
+            sprite.x = game.width/2;
+            sprite.y = game.height/2;
+
+            textX = game.width/3;
+            textY = game.height/2 - 30;
+        }else if(result === "LOSE"){
+            message = "VOUS ETES MORT";
+
+            textX = game.width/3;
+            textY = game.height/2 - 30;
+        }
+
+        var fontSize = 72;
+        var style = { font: fontSize+"px Arial", fill: "BLACK", align: "center"  };
+
+        var text = game.add.text(textX, textY, message, style);
+        
+        if(!flag){
+            restartButton = game.add.button(game.world.centerX - 95, game.world.centerY + 50, 'rejouer', restartGame, this);
+            flag = true;
+            console.log(restartButton);
+        }
+
+        timer.stop();
+        timer2.stop();
+
+        game.physics.arcade.isPaused = true;
+        game2.physics.arcade.isPaused = true;
+
+    }
+
 
 // Phaser version 2.4.8
 // HealthBar 
