@@ -275,8 +275,10 @@ function updateDay() {
 }
 
 function restartGame() {
+    day = 121;
     flagRestartButton = false;
     totalEnergy = 0;
+    nbBatteries = 0;
     restartButton.destroy();
     game.state.restart();
     stats.state.restart();
