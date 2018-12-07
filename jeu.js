@@ -11,7 +11,8 @@ function preload() {
 
     game.load.image('baie', 'Graphics/baie.png');
     game.load.image('batterie', 'Graphics/batterie.png');
-    game.load.image('arbre', 'Graphics/cactus.png');
+    game.load.image('cactus', 'Graphics/cactus.png');
+    game.load.image('eau', 'Graphics/eau.png');
 
     game.load.image('carte', 'Graphics/map.png');
 
@@ -35,12 +36,16 @@ var timer;
 
 
 var eatbar;
+var drinkbar;
+var energybar;
+
+var maxLenBar = 500;
 
 var day;
 var timer2;
     
 var bmpText;
-
+var items = ["baie","batterie","eau"];
 
 function create2() {
 
@@ -78,7 +83,8 @@ function create2() {
 }
 
 function create() {
-
+    game.world.setBounds(0, 0, 800, 800);
+    
     game.add.tileSprite(0, 0, game.width, game.height, "carte");
 
     cursors = game.input.keyboard.createCursorKeys();
@@ -88,7 +94,8 @@ function create() {
 
     sprite = game.add.sprite(685, 390, 'bas');
 
-    game.physics.arcade.enable(sprite);
+    game.physics.enable(sprite);
+    game.camera.follow(sprite, Phaser.Camera.FOLLOW_LOCKON);
 
     group = game.add.physicsGroup();
 
@@ -105,8 +112,8 @@ function create() {
     }
 
     for (var i = 0; i < 20; i++) {
-        var c = group.create(game.rnd.between(10, 1346), game.rnd.between(10, 700), 'arbre');
-        c.id = "arbre";
+        var c = group.create(game.rnd.between(100, 770), game.rnd.between(0, 570), 'cactus');
+        c.id = "cactus";
         c.body.immovable = true;
     }
 
@@ -123,13 +130,13 @@ function end() {
     console.log("stop");
 }
 
+function generateItem(items){
+
+}
+
 function update() {
-
-    if (game.physics.arcade.collide(sprite, group, collisionHandler, processHandler, this)) {
-        console.log('boom');
-    }
-
-    // game.physics.arcade.overlap(sprite, group, collisionHandler, null, this);
+    //game.time.events.add(Phaser.Timer.SECOND * game.rnd.between(1,5), generateItem(items));
+    game.physics.arcade.collide(sprite, group, collisionHandler, processHandler, this)
 
     sprite.body.velocity.x = 0;
     sprite.body.velocity.y = 0;
@@ -158,8 +165,21 @@ function processHandler(player, veg) {
 }
 
 function collisionHandler(player, veg) {
-    if (veg.id == "baie" || veg.id == "batterie") {
-        veg.kill();
+    switch(veg.id){
+        case "baie":
+            eatbar.width = (eatbar.width + 50 > maxLenBar)? maxLenBar : eatbar.width + 50;
+            veg.kill();
+            break;
+
+        case "batterie":
+            energybar.width = (energybar.width + 50 > maxLenBar)? maxLenBar : energybar.width + 50;
+            veg.kill();
+            break;
+
+        case "eau":
+            drinkbar.width = (drinkbar.width + 50 > maxLenBar)? maxLenBar : drinkbar.width + 50;
+            veg.kill();
+            break;
     }
 }
 
@@ -184,6 +204,7 @@ function randomnbr(a, b, n) {
 
 
 function updateDay() {
+
     day--;
     console.log("in update day")
     bmpText.text = "JOURS RESTANTS : " + day;
