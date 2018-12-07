@@ -25,7 +25,7 @@ function preloadStats() {
 function loadImages(game, Simage) {
     game.load.image(Simage, 'Graphics/' + Simage + '.png');
 }
-
+var i=0;
 var player;
 var objectsGroup;
 var kb;
@@ -112,13 +112,13 @@ function create() {
 
     objectsGroup = game.add.physicsGroup();
 
-    generatedItem = generateRandomItems(100);
+    generatedItem = generateRandomItems(300);
 
     generateSameItem('cactus', 50);
     generateSameItem('rocher', 30);
 
     timerGame = game.time.create(false);
-    timerGame.loop(game.rnd.between(800, 2000), showObjet, this);
+    timerGame.loop(game.rnd.between(500, 1500), showObjet, this);
     timerGame.start();
 
 
@@ -131,6 +131,8 @@ function create() {
 }
 
 function showObjet() {
+    i++;
+    console.log(i);
     var obj = generatedItem.shift();
     var c = objectsGroup.create(obj[0], obj[1], obj.id);
     c.id = obj.id;
@@ -147,7 +149,7 @@ function generateRandomItems(n) {
     var arr = [];
 
     for (var i = 0; i < n; i++) {
-        arr.push([randomInRange(0, game.width), randomInRange(0, game.height)]);
+        arr.push([randomInRange(200, game.width-200), randomInRange(100, game.height-100)]);
     }
 
 
@@ -250,15 +252,15 @@ function collisionHandler(player, veg) {
 
 
 function update_drinkbar() { 
-    drinkbar.width -= 0.35;
+    drinkbar.width -= 0.25;
 }
 
 function update_eatbar() {
-    eatbar.width -= 0.25;;
+    eatbar.width -= 0.20;;
 }
 
 function update_energybar() {
-    energybar.width -= 0.15;;
+    energybar.width -= 0.25;;
 }
 
 function randomnbr(a, b, n) {
