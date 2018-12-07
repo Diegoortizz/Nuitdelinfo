@@ -43,7 +43,9 @@ var maxLenBar = 500;
 
 var day;
 var timer2;
-    
+var timer3;
+var generatedItem;
+
 var bmpText;
 var items = ["baie","batterie","eau"];
 
@@ -81,10 +83,9 @@ function create2() {
     energy = game2.add.text(5, 62, "Energie", style);
 
 }
+function create() {    
+    game.world.scale.setTo(1.5, 1.5);
 
-function create() {
-    game.world.setBounds(0, 0, 800, 800);
-    
     game.add.tileSprite(0, 0, game.width, game.height, "carte");
 
     cursors = game.input.keyboard.createCursorKeys();
@@ -92,18 +93,15 @@ function create() {
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
 
-    sprite = game.add.sprite(685, 390, 'bas');
+    sprite = game.add.sprite(game.width/2, game.height/2+50, 'bas');
+
+    game.camera.follow(sprite, Phaser.Camera.FOLLOW_LOCKON);
 
     game.physics.enable(sprite);
-    game.camera.follow(sprite, Phaser.Camera.FOLLOW_LOCKON);
 
     group = game.add.physicsGroup();
 
-    for (var i = 0; i < 30; i++) {
-        var c = group.create(game.rnd.between(10, 1346), game.rnd.between(10, 700), 'baie');
-        c.id = "baie";
-        c.body.immovable = true;
-    }
+    generatedItem = generateObj(100);
 
     for (var i = 0; i < 10; i++) {
         var c = group.create(game.rnd.between(10, 1346), game.rnd.between(10, 700), 'batterie');
@@ -116,6 +114,9 @@ function create() {
         c.id = "cactus";
         c.body.immovable = true;
     }
+    generateCactus(50);
+
+    timer3 = game.time.events.loop(game.rnd.between(500, 3000), showObjet, this);
 
 
     for (var i = 0; i < 30; i++) {
@@ -134,16 +135,67 @@ function create() {
     game.time.events.add(Phaser.Timer.SECOND * 10, end, this);
 }
 
+function showObjet(){
+    var obj = generatedItem.shift();
+    var c = group.create(obj[0], obj[1], obj.id);
+    c.id = obj.id;
+    c.body.immovable = true;
+}
+
 function end() {
     console.log("stop");
 }
 
-function generateItem(items){
+function randomInRange(start, end) {
+    return Math.floor(Math.random() * (end - start + 1) + start);
+}
 
+function generateObj(n) {
+    var arr = [];
+
+    for (var i = 0; i < n; i++) {
+        arr.push([randomInRange(0, game.width), randomInRange(0, game.height)]);
+    }
+
+
+    var unique = arr.map(cur => JSON.stringify(cur))
+        .filter(function (curr, index, self) {
+            return self.indexOf(curr) == index;
+        })
+        .map(cur => JSON.parse(cur));
+
+    for (var i = 0; i < unique.length; i++) {
+        var x = unique[i][0];
+        var y = unique[i][1];
+        if (x < 730 && x > 650 && y > 300 && y < 380) {
+            unique.splice(i, 1);
+        } else {
+            unique[i].id = items[randomInRange(0,2)];
+        }
+    }
+
+    return unique;
+}
+
+function generateCactus(n){
+    for(var i=0; i<n; i++){
+        var c = group.create(randomInRange(0, game.width), randomInRange(0, game.height), 'cactus');
+        c.id = 'cactus';
+        c.body.immovable = true;
+    }
+}
+
+function checkBounds(){
+    if(sprite.x < 0){sprite.x = game.width}
+    if(sprite.x > game.width){sprite.x = 0}
+    if(sprite.y < 0){sprite.y = game.height}
+    if(sprite.y > game.height){sprite.y = 0}
 }
 
 function update() {
     //game.time.events.add(Phaser.Timer.SECOND * game.rnd.between(1,5), generateItem(items));
+    checkBounds();
+
     game.physics.arcade.collide(sprite, group, collisionHandler, processHandler, this)
 
     sprite.body.velocity.x = 0;
@@ -212,13 +264,19 @@ function randomnbr(a, b, n) {
 
 
 function updateDay() {
-
     day--;
     if (day <1){
         console.log("test")
     }
     console.log("in update day")
     bmpText.text = "JOURS RESTANTS : " + day;
+
+}
+
+function render() {
+
+    game.debug.cameraInfo(game.camera, 32, 32);
+    game.debug.spriteCoords(player, 32, 500);
 
 }
 
