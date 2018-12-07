@@ -1,5 +1,5 @@
 var game2 = new Phaser.Game(800, 95, Phaser.Canvas, 'phaser-example-2', { preload: preload2, create: create2 });
-var game = new Phaser.Game(1356, 700, Phaser.Canvas, 'phaser-example', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(1356, 900, Phaser.Canvas, 'phaser-example', { preload: preload, create: create, update: update });
 
 
 function preload() {
@@ -105,17 +105,25 @@ function create() {
         c.body.immovable = true;
     }
 
-    for (var i = 0; i < 30; i++) {
+    for (var i = 0; i < 10; i++) {
         var c = group.create(game.rnd.between(10, 1346), game.rnd.between(10, 700), 'batterie');
         c.id = "batterie";
         c.body.immovable = true;
     }
 
-    for (var i = 0; i < 20; i++) {
-        var c = group.create(game.rnd.between(100, 770), game.rnd.between(0, 570), 'cactus');
+    for (var i = 0; i < 40; i++) {
+        var c = group.create(game.rnd.between(10, 1346), game.rnd.between(10, 700), 'cactus');
         c.id = "cactus";
         c.body.immovable = true;
     }
+
+
+    for (var i = 0; i < 30; i++) {
+        var c = group.create(game.rnd.between(100, 770), game.rnd.between(10, 570), 'eau');
+        c.id = "eau";
+        c.body.immovable = true;
+    }
+
 
     var base = group.create(650,300,'base');
     base.id="base";
@@ -206,6 +214,9 @@ function randomnbr(a, b, n) {
 function updateDay() {
 
     day--;
+    if (day <1){
+        console.log("test")
+    }
     console.log("in update day")
     bmpText.text = "JOURS RESTANTS : " + day;
 
