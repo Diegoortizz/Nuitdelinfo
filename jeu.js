@@ -1,5 +1,5 @@
 var game2 = new Phaser.Game(800, 95, Phaser.Canvas, 'phaser-example-2', { preload: preload2, create: create2 });
-var game = new Phaser.Game(800, 600, Phaser.Canvas, 'phaser-example', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(1356, 700, Phaser.Canvas, 'phaser-example', { preload: preload, create: create, update: update });
 
 
 function preload() {
@@ -11,9 +11,11 @@ function preload() {
 
     game.load.image('baie', 'Graphics/baie.png');
     game.load.image('batterie', 'Graphics/batterie.png');
-    game.load.image('arbre', 'Graphics/arbre.png');
+    game.load.image('arbre', 'Graphics/cactus.png');
 
-    game.load.image('carte', 'Graphics/carte_vierge.png');
+    game.load.image('carte', 'Graphics/map.png');
+
+    game.load.image('base', 'Graphics/base.png');
 
 }
 
@@ -68,7 +70,10 @@ function create2() {
 
     var style = { font: "16px Arial", fill: "BLACK" };
     day = 121;
-    bmpText = game2.add.text(16, 16, "JOURS RESTANTS : " + day, style);
+    bmpText = game2.add.text(550, 16, "JOURS RESTANTS : " + day, style);
+    food = game2.add.text(5, 4, "Nourriture", style);
+    water = game2.add.text(5, 33, "Eau", style);
+    energy = game2.add.text(5, 62, "Energie", style);
 
 }
 
@@ -81,29 +86,33 @@ function create() {
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
 
-    sprite = game.add.sprite(32, 200, 'bas');
+    sprite = game.add.sprite(685, 390, 'bas');
 
     game.physics.arcade.enable(sprite);
 
     group = game.add.physicsGroup();
 
     for (var i = 0; i < 30; i++) {
-        var c = group.create(game.rnd.between(100, 770), game.rnd.between(0, 570), 'baie');
+        var c = group.create(game.rnd.between(10, 1346), game.rnd.between(10, 700), 'baie');
         c.id = "baie";
         c.body.immovable = true;
     }
 
     for (var i = 0; i < 30; i++) {
-        var c = group.create(game.rnd.between(100, 770), game.rnd.between(0, 570), 'batterie');
+        var c = group.create(game.rnd.between(10, 1346), game.rnd.between(10, 700), 'batterie');
         c.id = "batterie";
         c.body.immovable = true;
     }
 
     for (var i = 0; i < 20; i++) {
-        var c = group.create(game.rnd.between(100, 770), game.rnd.between(0, 570), 'arbre');
+        var c = group.create(game.rnd.between(10, 1346), game.rnd.between(10, 700), 'arbre');
         c.id = "arbre";
         c.body.immovable = true;
     }
+
+    var base = group.create(650,300,'base');
+    base.id="base";
+    base.body.immovable=true;
 
     cursors = game.input.keyboard.createCursorKeys();
 
@@ -156,17 +165,17 @@ function collisionHandler(player, veg) {
 
 function update_drinkbar() { // 15
     // console.log("drink");
-    drinkbar.width -= randomnbr(10, 15, 4);
+    drinkbar.width -= 0.7;
 }
 
 function update_eatbar() { // 10
     // console.log("eat");
-    eatbar.width -= randomnbr(5, 10, 4);;
+    eatbar.width -= 0.5;;
 }
 
 function update_energybar() { // 5
     // console.log("energy");
-    energybar.width -= randomnbr(1, 6, 4);;
+    energybar.width -= 0.3;;
 }
 
 function randomnbr(a, b, n) {
